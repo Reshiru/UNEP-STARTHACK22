@@ -16,7 +16,7 @@ class DeepModel():
     
     def run(self):
         inputs = keras.Input(shape=(self.input_size))
-
+        
         w_2 = self.append_dense_layer(inputs, 'DENSE-1')
         w_2 = self.append_dense_layer(w_2, 'DENSE-1')
         w_o = self.append_dense_layer(w_2, 'DENSE-1')
