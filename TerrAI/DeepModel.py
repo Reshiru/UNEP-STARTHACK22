@@ -24,6 +24,7 @@ class DeepModel():
         
         w_2 = self.append_dense_layer(inputs, 'DENSE-1')
         w_2 = self.append_dense_layer(w_2, 'DENSE-1')
+        w_2 = self.append_dense_layer(w_2, 'DENSE-1')
         w_o = self.append_dense_layer(w_2, 'DENSE-1')
         
         outputs = Dense(self.output_size, activation='sigmoid')(w_o)
@@ -35,9 +36,9 @@ class DeepModel():
 
     def append_dense_layer(self, x, prefix):
         self.layer_index += 1
-        x = Dense(64, activation='relu', name=f"{prefix}-DENSE-{self.layer_index}")(x)
+        x = Dense(128, activation='relu', name=f"{prefix}-DENSE-{self.layer_index}")(x)
         x = BatchNormalization(name=f"{prefix}-NORM-{self.layer_index}")(x)
-        x = Dropout(0.2, name=f"{prefix}-DROP-{self.layer_index}")(x)
+        x = Dropout(0.5, name=f"{prefix}-DROP-{self.layer_index}")(x)
         return x
 
     def append_gru_layer(self, x, prefix, return_sequences = True, first_layer = False):
