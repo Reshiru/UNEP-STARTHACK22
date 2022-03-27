@@ -30,7 +30,7 @@ class DeepModel():
 
     def append_dense_layer(self, x, prefix):
         self.layer_index += 1
-        x = Dense(32, activation='relu', name=f"{prefix}-DENSE-{self.layer_index}")(x)
+        x = Dense(256, activation='relu', name=f"{prefix}-DENSE-{self.layer_index}")(x)
         #x = BatchNormalization(name=f"{prefix}-NORM-{self.layer_index}")(x)
         #x = Dropout(0.2, name=f"{prefix}-DROP-{self.layer_index}")(x)
         return x
@@ -72,3 +72,6 @@ class DeepModel():
     def prod(self):
         self.model = self.run()
         self.model.load_weights(self.checkpoint_path)
+    
+    def predict(self, dataset):
+        return self.model.predict(dataset)
