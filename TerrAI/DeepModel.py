@@ -21,18 +21,18 @@ class DeepModel():
         w_2 = self.append_dense_layer(w_2, 'DENSE-1')
         w_o = self.append_dense_layer(w_2, 'DENSE-1')
         
-        outputs = Dense(self.output_size, activation='softmax')(w_o)
+        outputs = Dense(self.output_size, activation='sigmoid')(w_o)
     
         model = models.Model(inputs=inputs, outputs=outputs, name="DENSE")
-        model.compile(optimizer=optimizers.Adam(), loss=tf.keras.losses.BinaryCrossentropy(), metrics=[binary_accuracy])
+        model.compile(optimizer=optimizers.Adam(), loss=tf.keras.losses.BinaryCrossentropy(), metrics=[binary_accuracy, Recall(), Precision()])
         
         return model
 
     def append_dense_layer(self, x, prefix):
         self.layer_index += 1
-        x = Dense(512, activation='relu', name=f"{prefix}-DENSE-{self.layer_index}")(x)
-        x = BatchNormalization(name=f"{prefix}-NORM-{self.layer_index}")(x)
-        x = Dropout(0.2, name=f"{prefix}-DROP-{self.layer_index}")(x)
+        x = Dense(32, activation='relu', name=f"{prefix}-DENSE-{self.layer_index}")(x)
+        #x = BatchNormalization(name=f"{prefix}-NORM-{self.layer_index}")(x)
+        #x = Dropout(0.2, name=f"{prefix}-DROP-{self.layer_index}")(x)
         return x
 
     def append_gru_layer(self, x, prefix, return_sequences = True, first_layer = False):
