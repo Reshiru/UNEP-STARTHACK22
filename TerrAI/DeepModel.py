@@ -4,10 +4,30 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import models, optimizers
 from tensorflow.keras.metrics import binary_accuracy, Recall, Precision, CategoricalAccuracy
-from tensorflow_addons.metrics import F1Score
 from tensorflow.keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping
 from tensorflow.keras.layers import *
-#from keras import backend as K
+from keras import backend as K
+
+# See: https://datascience.stackexchange.com/questions/45165/how-to-get-accuracy-f1-precision-and-recall-for-a-keras-model
+def recall_m(y_true, y_pred):
+    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+    possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
+    recall = true_positives / (possible_positives + K.epsilon())
+    return recall
+
+# See: https://datascience.stackexchange.com/questions/45165/how-to-get-accuracy-f1-precision-and-recall-for-a-keras-model
+def precision_m(y_true, y_pred):
+    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+    predicted_positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
+    precision = true_positives / (predicted_positives + K.epsilon())
+    return precision
+
+# See: https://datascience.stackexchange.com/questions/45165/how-to-get-accuracy-f1-precision-and-recall-for-a-keras-model
+def f1_score(y_true, y_pred):
+    y_pred = tf.math.round(y_pred)
+    precision = precision_m(y_true, y_pred)
+    recall = recall_m(y_true, y_pred)
+    return 2*((precision*recall)/(precision+recall+K.epsilon()))
 
 class DeepModel():
     def __init__(self, checkpoint_path, output_size, input_size):
@@ -15,10 +35,8 @@ class DeepModel():
         self.input_size = input_size
         self.layer_index = 0
         self.output_size = int(output_size)
-        
-    #def custom_activation(self, x):
-    #    return tf.math.round(K.sigmoid(x))
     
+
     def run(self):
         inputs = keras.Input(shape=(self.input_size))
         
@@ -32,7 +50,7 @@ class DeepModel():
         outputs = Dense(self.output_size, activation='sigmoid')(w_o)
     
         model = models.Model(inputs=inputs, outputs=outputs, name="DENSE")
-        model.compile(optimizer=optimizers.Adam(), loss=tf.keras.losses.BinaryCrossentropy(), metrics=[binary_accuracy, Recall(), Precision(), F1Score(num_classes=1, average='micro')])
+        model.compile(optimizer=optimizers.Adam(), loss=tf.keras.losses.BinaryCrossentropy(), metrics=[binary_accuracy, Recall(), Precision(), f1_score])
         
         return model
 
