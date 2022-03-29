@@ -23,7 +23,9 @@ class DeepModel():
         inputs = keras.Input(shape=(self.input_size))
         
         w_2 = self.append_dense_layer(inputs, 'DENSE-1')
+        w_2 = self.append_noise_layer(w_2, 'DENSE-1')
         w_2 = self.append_dense_layer(w_2, 'DENSE-1')
+        w_2 = self.append_noise_layer(w_2, 'DENSE-1')
         w_2 = self.append_dense_layer(w_2, 'DENSE-1')
         w_o = self.append_dense_layer(w_2, 'DENSE-1')
         
@@ -36,7 +38,7 @@ class DeepModel():
 
     def append_dense_layer(self, x, prefix):
         self.layer_index += 1
-        x = Dense(1024, activation='relu', name=f"{prefix}-DENSE-{self.layer_index}")(x)
+        x = Dense(256, activation='relu', name=f"{prefix}-DENSE-{self.layer_index}")(x)
         x = BatchNormalization(name=f"{prefix}-NORM-{self.layer_index}")(x)
         x = Dropout(0.5, name=f"{prefix}-DROP-{self.layer_index}")(x)
         return x
