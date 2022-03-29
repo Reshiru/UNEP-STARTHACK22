@@ -44,7 +44,6 @@ class DeepModel():
         w_2 = self.append_noise_layer(w_2, 'DENSE-1')
         w_2 = self.append_dense_layer(w_2, 'DENSE-1')
         w_2 = self.append_noise_layer(w_2, 'DENSE-1')
-        w_2 = self.append_dense_layer(w_2, 'DENSE-1')
         w_o = self.append_dense_layer(w_2, 'DENSE-1')
         
         outputs = Dense(self.output_size, activation='sigmoid')(w_o)
