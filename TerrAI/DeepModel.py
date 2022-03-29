@@ -30,7 +30,7 @@ class DeepModel():
         outputs = Dense(self.output_size, activation='sigmoid')(w_o)
     
         model = models.Model(inputs=inputs, outputs=outputs, name="DENSE")
-        model.compile(optimizer=optimizers.Adam(), loss=tf.keras.losses.BinaryCrossentropy(), metrics=[binary_accuracy, Recall(), Precision(), F1Score(num_classes=2, average='micro')])
+        model.compile(optimizer=optimizers.Adam(), loss=tf.keras.losses.BinaryCrossentropy(), metrics=[binary_accuracy, Recall(), Precision(), F1Score(num_classes=1, average='micro')])
         
         return model
 
