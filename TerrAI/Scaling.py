@@ -38,7 +38,7 @@ class Scaling():
         main_cols = self._columns_difference(data)
         
         # Scale X values
-        data = self.scale(data[main_cols])
+        #data = self.scale(data[main_cols])
         
         # Group by features
         groups = sorted(set([re.sub(r'\d+_', '', column) for column in main_cols]))
@@ -47,4 +47,31 @@ class Scaling():
         grouped_inputs = np.hstack([np.expand_dims(data[
             [column for column in main_cols if column.endswith(group)]].to_numpy(), axis=1) 
                                     for group in groups])
-        return grouped_inputs
+        print(grouped_inputs.shape)
+        print('DOOP', np.expand_dims(data[
+            [column for column in main_cols if column.endswith(groups[0])]].to_numpy(), axis=1).shape)
+        """return grouped_inputs"""
+    
+        grouped_inputs = []
+        for group in groups:
+            # Combine columns based on their name as a single flat feature: (rows, 25)
+            grouped_input = data[[column for column in main_cols if column.endswith(group)]].to_numpy()
+            print(grouped_input[0])
+            print(grouped_input.shape)
+            # Remap to (rows, 5, 5)
+            reshaped_input = np.reshape(grouped_input, (len(data), 5,5))
+            print(reshaped_input[0])
+            print(reshaped_input.shape)
+            # Transpose (5,5) part to match CELLID from Data dictionary.docx: (rows, 5, 5)
+            transposed_input = np.transpose(reshaped_input, [0,2,1])
+            print(transposed_input[0])
+            print(transposed_input.shape)
+            
+            data_group = np.expand_dims(transposed_input, axis=1)
+            print(data_group[0])
+            print(data_group.shape)
+            
+            grouped_inputs.append(data_group)
+        
+        # Stack, expected: (rows, features, 5, 5)
+        return np.hstack(grouped_inputs)
