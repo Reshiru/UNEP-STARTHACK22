@@ -36,8 +36,27 @@ class DeepModel():
         self.layer_index = 0
         self.output_size = int(output_size)
     
-
     def run(self):
+        model = models.Sequential()
+        model.add(Conv2D(input_shape=(9, 5, 5), filters=96, kernel_size=(3,3), padding="same"))
+        model.add(Activation('relu'))
+        model.add(Conv2D(filters=96, kernel_size=(3,3), strides=(1,1), padding="same"))
+        model.add(Activation('relu'))
+        #model.add(Dropout(0.2))
+        model.add(Conv2D(filters=96, kernel_size=(3,3), strides=(1,1), padding="same"))
+        model.add(Activation('relu'))
+        model.add(Conv2D(filters=96, kernel_size=(3,3), strides=(1,1), padding="same"))
+        model.add(Activation('relu'))
+        #model.add(Dropout(0.5))
+        model.add(Flatten())
+        model.add(BatchNormalization())
+        model.add(Dense(256))
+        model.add(Activation('relu'))
+        model.add(Dense(self.output_size, activation="sigmoid"))
+        model.compile(optimizer=optimizers.Adam(), loss=tf.keras.losses.BinaryCrossentropy(), metrics=[binary_accuracy, Recall(), Precision(), f1_score])
+        return model
+        
+    """def run(self):
         inputs = keras.Input(shape=(self.input_size))
         
         w_2 = self.append_dense_layer(inputs, 'DENSE-1')
@@ -51,11 +70,11 @@ class DeepModel():
         model = models.Model(inputs=inputs, outputs=outputs, name="DENSE")
         model.compile(optimizer=optimizers.Adam(), loss=tf.keras.losses.BinaryCrossentropy(), metrics=[binary_accuracy, Recall(), Precision(), f1_score])
         
-        return model
+        return model"""
 
     def append_dense_layer(self, x, prefix):
         self.layer_index += 1
-        x = Dense(64, activation='relu', name=f"{prefix}-DENSE-{self.layer_index}")(x)
+        x = Dense(40, activation='relu', name=f"{prefix}-DENSE-{self.layer_index}")(x)
         x = BatchNormalization(name=f"{prefix}-NORM-{self.layer_index}")(x)
         x = Dropout(0.5, name=f"{prefix}-DROP-{self.layer_index}")(x)
         return x
