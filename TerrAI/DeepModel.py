@@ -9,6 +9,10 @@ from tensorflow.keras.layers import *
 from keras import backend as K
 from tensorflow.keras import regularizers
 
+# Hyper parameter search
+from kerastuner.tuners import BayesianOptimization #pip install -U keras-tuner
+from kerastuner import HyperModel, Objective
+
 # See: https://datascience.stackexchange.com/questions/45165/how-to-get-accuracy-f1-precision-and-recall-for-a-keras-model
 def recall_m(y_true, y_pred):
     true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
@@ -30,7 +34,7 @@ def f1_score(y_true, y_pred):
     recall = recall_m(y_true, y_pred)
     return 2*((precision*recall)/(precision+recall+K.epsilon()))
 
-class DeepModel():
+class DeepModel(HyperModel):
     def __init__(self, checkpoint_path, output_size, input_size):
         self.checkpoint_path = checkpoint_path
         self.input_size = input_size
@@ -42,34 +46,40 @@ class DeepModel():
         model.add(Conv2D(input_shape=(9, 5, 5), filters=32, kernel_size=(3,3), padding="same"))
         model.add(Activation('relu'))
         model.add(Dropout(0.2))
-        model.add(Conv2D(filters=16, kernel_size=(3,3), strides=(1,1), padding="same"))
+        model.add(Conv2D(filters=8, kernel_size=(3,3), strides=(1,1), padding="same"))
         model.add(Activation('relu'))
         model.add(Dropout(0.2))
         model.add(Flatten())
-        #model.add(BatchNormalization())
-        model.add(Dense(32))
+        model.add(Dense(16))
         model.add(Activation('relu'))
         model.add(Dropout(0.5))
         model.add(Dense(self.output_size, activation="sigmoid"))
         model.compile(optimizer=optimizers.Adam(), loss=tf.keras.losses.BinaryCrossentropy(), metrics=[binary_accuracy, Recall(), Precision(), f1_score])
         return model
-        
-    """def run(self):
-        inputs = keras.Input(shape=(self.input_size))
-        
-        w_2 = self.append_dense_layer(inputs, 'DENSE-1')
-        w_2 = self.append_noise_layer(w_2, 'DENSE-1')
-        w_2 = self.append_dense_layer(w_2, 'DENSE-1')
-        w_2 = self.append_noise_layer(w_2, 'DENSE-1')
-        w_o = self.append_dense_layer(w_2, 'DENSE-1')
-        
-        outputs = Dense(self.output_size, activation='sigmoid')(w_o)
     
-        model = models.Model(inputs=inputs, outputs=outputs, name="DENSE")
-        model.compile(optimizer=optimizers.Adam(), loss=tf.keras.losses.BinaryCrossentropy(), metrics=[binary_accuracy, Recall(), Precision(), f1_score])
+    def build(self, hp):
+        model = models.Sequential()
+        model.add(Conv2D(input_shape=(9, 5, 5), filters=hp.Int('f_1',min_value=4,max_value=64,step=4), kernel_size=(3,3), padding="same"))
+        model.add(Activation('relu'))
+        model.add(Dropout(hp.Float('d_1',min_value=0.1,max_value=0.5,step=0.1)))
+        model.add(Conv2D(filters=hp.Int('f_2',min_value=4,max_value=32,step=2), kernel_size=(3,3), strides=(1,1), padding="same"))
+        model.add(Activation('relu'))
+        model.add(Dropout(hp.Float('d_1',min_value=0.1,max_value=0.5,step=0.1)))
+        model.add(Flatten())
+        model.add(Dense(16))
+        model.add(Activation('relu'))
+        model.add(Dropout(hp.Float('d_1',min_value=0.1,max_value=0.5,step=0.1)))
+        model.add(Dense(self.output_size, activation="sigmoid"))
+        model.compile(optimizer=optimizers.Adam(), loss=tf.keras.losses.BinaryCrossentropy(), metrics=[binary_accuracy, f1_score])
+        return model
         
-        return model"""
-
+    def search_better_model(self, train_dataset, test_dataset, class_weight, batch_size):
+        search_opt = BayesianOptimization(hypermodel=self, objective=Objective("val_f1_score", direction="max"), max_trials=256, executions_per_trial=1, overwrite=False)
+        search_opt.search(train_dataset, validation_data=test_dataset, epochs=20, batch_size=batch_size, class_weight=class_weight, verbose=0)
+        best_model = search_opt.get_best_models(num_models=1)[0]
+        best_model.summary()
+        return search_opt
+        
     def append_dense_layer(self, x, prefix):
         self.layer_index += 1
         x = Dense(40, activation='relu', name=f"{prefix}-DENSE-{self.layer_index}")(x)
