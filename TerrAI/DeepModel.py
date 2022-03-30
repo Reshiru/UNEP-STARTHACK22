@@ -41,7 +41,7 @@ class DeepModel():
         model = models.Sequential()
         model.add(Conv2D(input_shape=(9, 5, 5), filters=32, kernel_size=(3,3), padding="same"))
         model.add(Activation('relu'))
-        model.add(Dropout(0.1))
+        model.add(Dropout(0.2))
         model.add(Conv2D(filters=16, kernel_size=(3,3), strides=(1,1), padding="same"))
         model.add(Activation('relu'))
         model.add(Dropout(0.2))
@@ -49,7 +49,7 @@ class DeepModel():
         #model.add(BatchNormalization())
         model.add(Dense(32))
         model.add(Activation('relu'))
-        model.add(Dropout(0.3))
+        model.add(Dropout(0.5))
         model.add(Dense(self.output_size, activation="sigmoid"))
         model.compile(optimizer=optimizers.Adam(), loss=tf.keras.losses.BinaryCrossentropy(), metrics=[binary_accuracy, Recall(), Precision(), f1_score])
         return model
