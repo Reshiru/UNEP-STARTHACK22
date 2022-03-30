@@ -31,7 +31,11 @@ class Scaling():
     def _columns_difference(self, data):
         main_cols = data.columns.tolist()
         main_cols.remove('Sample_ID')
-        main_cols.remove('Label')
+        try:
+            main_cols.remove('Label')
+        except ValueError:
+            pass
+        
         return main_cols
     
     def reshape_and_scale_X(self, data):
