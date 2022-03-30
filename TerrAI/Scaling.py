@@ -35,12 +35,13 @@ class Scaling():
         return main_cols
     
     def reshape_and_scale_X(self, data):
-        # Scale X values
-        data = self.scale(data)
-        
         main_cols = self._columns_difference(data)
+        
+        # Scale X values
+        data = self.scale(data[main_cols])
+        
         # Group by features
-        groups = set([re.sub(r'\d+_', '', column) for column in main_cols])
+        groups = sorted(set([re.sub(r'\d+_', '', column) for column in main_cols]))
 
         # Results in shape: (rows, features, values) -> expected 9 features with 5x5 (25) values
         grouped_inputs = np.hstack([np.expand_dims(data[
