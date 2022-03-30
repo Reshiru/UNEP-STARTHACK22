@@ -28,18 +28,22 @@ class Scaling():
             raise Exception('Scaling', f'{len(data.values < 0)} Values are found to be above 1 and {len(data.values > 1)} bellow 0')
         return data
     
+    def _columns_difference(self, data):
+        main_cols = data.columns.tolist()
+        main_cols.remove('Sample_ID')
+        main_cols.remove('Label')
+        return main_cols
+    
     def reshape_and_scale_X(self, data):
         # Scale X values
         data = self.scale(data)
         
-        main_cols = data.columns.difference(['Sample_ID', 'Label'])
+        main_cols = self._columns_difference(data)
         # Group by features
-        groups = set(main_cols.str.replace(r'\d+_', '', regex=True))
+        groups = set([re.sub(r'\d+_', '', column) for column in main_cols])
 
         # Results in shape: (rows, features, values) -> expected 9 features with 5x5 (25) values
-        # TODO: Verify if column order is sorted
         grouped_inputs = np.hstack([np.expand_dims(data[
-            [column for column in data.columns if column.endswith(group)]].to_numpy(), axis=1) 
+            [column for column in main_cols if column.endswith(group)]].to_numpy(), axis=1) 
                                     for group in groups])
-
         return grouped_inputs
