@@ -7,6 +7,7 @@ from tensorflow.keras.metrics import binary_accuracy, Recall, Precision, Categor
 from tensorflow.keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping
 from tensorflow.keras.layers import *
 from keras import backend as K
+from tensorflow.keras import regularizers
 
 # See: https://datascience.stackexchange.com/questions/45165/how-to-get-accuracy-f1-precision-and-recall-for-a-keras-model
 def recall_m(y_true, y_pred):
@@ -38,20 +39,17 @@ class DeepModel():
     
     def run(self):
         model = models.Sequential()
-        model.add(Conv2D(input_shape=(9, 5, 5), filters=96, kernel_size=(3,3), padding="same"))
+        model.add(Conv2D(input_shape=(9, 5, 5), filters=32, kernel_size=(3,3), padding="same"))
         model.add(Activation('relu'))
-        model.add(Conv2D(filters=96, kernel_size=(3,3), strides=(1,1), padding="same"))
+        model.add(Dropout(0.1))
+        model.add(Conv2D(filters=64, kernel_size=(3,3), strides=(1,1), padding="same"))
         model.add(Activation('relu'))
-        #model.add(Dropout(0.2))
-        model.add(Conv2D(filters=96, kernel_size=(3,3), strides=(1,1), padding="same"))
-        model.add(Activation('relu'))
-        model.add(Conv2D(filters=96, kernel_size=(3,3), strides=(1,1), padding="same"))
-        model.add(Activation('relu'))
-        #model.add(Dropout(0.5))
+        model.add(Dropout(0.2))
         model.add(Flatten())
-        model.add(BatchNormalization())
-        model.add(Dense(256))
+        #model.add(BatchNormalization())
+        model.add(Dense(128))
         model.add(Activation('relu'))
+        model.add(Dropout(0.3))
         model.add(Dense(self.output_size, activation="sigmoid"))
         model.compile(optimizer=optimizers.Adam(), loss=tf.keras.losses.BinaryCrossentropy(), metrics=[binary_accuracy, Recall(), Precision(), f1_score])
         return model
