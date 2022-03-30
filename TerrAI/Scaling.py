@@ -27,3 +27,19 @@ class Scaling():
             print()
             raise Exception('Scaling', f'{len(data.values < 0)} Values are found to be above 1 and {len(data.values > 1)} bellow 0')
         return data
+    
+    def reshape_and_scale_X(self, data):
+        # Scale X values
+        data = self.scale(data)
+        
+        main_cols = data.columns.difference(['Sample_ID', 'Label'])
+        # Group by features
+        groups = set(main_cols.str.replace(r'\d+_', '', regex=True))
+
+        # Results in shape: (rows, features, values) -> expected 9 features with 5x5 (25) values
+        # TODO: Verify if column order is sorted
+        grouped_inputs = np.hstack([np.expand_dims(data[
+            [column for column in data.columns if column.endswith(group)]].to_numpy(), axis=1) 
+                                    for group in groups])
+
+        return grouped_inputs
