@@ -58,6 +58,16 @@ class Scaling():
             transposed_input = np.transpose(reshaped_input, [0,2,1])
             data_group = np.expand_dims(transposed_input, axis=1)
             grouped_inputs.append(data_group)
-        
+            
         # Stack, expected: (rows, features, 5, 5)
-        return np.hstack(grouped_inputs)
+        stacked_x = np.hstack(grouped_inputs)
+        stacked_x_90 = np.rot90(stacked_x, 1, axes=(-2, -1))
+        stacked_x_180 = np.rot90(stacked_x, 2, axes=(-2, -1))
+        stacked_x_270 = np.rot90(stacked_x, 3, axes=(-2, -1))
+        
+        # Keep in mind to duplicate y data (4x y)
+        return np.vstack([stacked_x, stacked_x_90, stacked_x_180, stacked_x_270])
+    
+    def reshape_and_scale_y(self, data):
+        y_formated = np.expand_dims(data.Label.to_numpy(dtype=np.float64), axis=1)
+        return np.vstack([y_formated, y_formated, y_formated, y_formated])
