@@ -41,16 +41,23 @@ class DeepModel(HyperModel):
         self.layer_index = 0
         self.output_size = int(output_size)
     
+    # https://github.com/keras-team/keras/issues/3945
+    #model.add(MaxPooling2D(pool_size=(3,3), data_format="channels_first", strides=(1,1), padding="same"))
     def run(self):
         model = models.Sequential()
-        model.add(Conv2D(input_shape=(9, 5, 5), filters=64, kernel_size=(3,3), padding="same"))
+        model.add(Conv2D(input_shape=(9, 5, 5), filters=32, kernel_size=(3,3), padding="same"))
         model.add(Activation('relu'))
         model.add(Dropout(0.1))
         model.add(Conv2D(filters=32, kernel_size=(3,3), strides=(1,1), padding="same"))
         model.add(Activation('relu'))
         model.add(Dropout(0.1))
+        model.add(MaxPooling2D(3,3))
         model.add(Flatten())
-        model.add(Dense(16))
+        model.add(Dense(128))
+        model.add(Activation('tanh'))
+        model.add(Dense(128))
+        model.add(Activation('relu'))
+        model.add(Dense(256))
         model.add(Activation('relu'))
         model.add(Dropout(0.1))
         model.add(Dense(self.output_size, activation="sigmoid"))
