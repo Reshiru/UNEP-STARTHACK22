@@ -38,7 +38,7 @@ class Scaling():
         
         return main_cols
     
-    def reshape_and_scale_X(self, data, stack=True):
+    def reshape_and_scale_X(self, data):
         main_cols = self._columns_difference(data)
         
         # Scale X values
@@ -60,16 +60,20 @@ class Scaling():
             grouped_inputs.append(data_group)
         
         stacked_x = np.hstack(grouped_inputs)
-        if stack:
-            # Stack, expected: (rows, features, 5, 5)
-            stacked_x_90 = np.rot90(stacked_x, 1, axes=(-2, -1))
-            stacked_x_180 = np.rot90(stacked_x, 2, axes=(-2, -1))
-            stacked_x_270 = np.rot90(stacked_x, 3, axes=(-2, -1))
-
-            # Keep in mind to duplicate y data (4x y)
-            return np.vstack([stacked_x, stacked_x_90, stacked_x_180, stacked_x_270])
         return stacked_x
     
     def reshape_and_scale_y(self, data):
         y_formated = np.expand_dims(data.Label.to_numpy(dtype=np.float64), axis=1)
-        return np.vstack([y_formated, y_formated, y_formated, y_formated])
+        return y_formated
+    
+    def expand_X(self, X):
+        # Stack, expected: (rows, features, 5, 5)
+        stacked_x_90 = np.rot90(X, 1, axes=(-2, -1))
+        stacked_x_180 = np.rot90(X, 2, axes=(-2, -1))
+        stacked_x_270 = np.rot90(X, 3, axes=(-2, -1))
+
+        # Keep in mind to duplicate y data (4x y)
+        return np.vstack([X, stacked_x_90, stacked_x_180, stacked_x_270])
+    
+    def expand_y(self, y):
+        return np.vstack([y, y, y, y])
