@@ -57,7 +57,7 @@ class DeepModel(HyperModel):
         model.add(Activation('tanh'))
         model.add(Dense(128))
         model.add(Activation('relu'))
-        model.add(Dense(256))
+        model.add(Dense(128))
         model.add(Activation('relu'))
         model.add(Dropout(0.1))
         model.add(Dense(self.output_size, activation="sigmoid"))
